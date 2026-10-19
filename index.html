@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nojiri-ko 16-Week Expedition Readiness Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            alpine: {
+              950: '#070b12',
+              900: '#0d1520',
+              800: '#162232',
+              700: '#22344a',
+              500: '#10b981',
+              400: '#34d399',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #070b12;
+      color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    input[type="range"] {
+      accent-color: #10b981;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-24 selection:bg-emerald-500 selection:text-slate-950">
+
+  <!-- TOP STICKY TACTICAL HEADER -->
+  <header class="sticky top-0 z-30 bg-alpine-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3">
+    <div class="max-w-xl mx-auto">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-inner">
+            <i class="fa-solid fa-mountain-sun text-lg"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Nagano-ken • 16W Prep</span>
+              <span id="syncStatusBadge" class="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+                <i class="fa-solid fa-circle text-[6px] text-emerald-400"></i> Ready
+              </span>
+            </div>
+            <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white">Nojiri-ko Expedition Hub</h1>
+          </div>
+        </div>
+        <button onclick="openResetModal()" title="Reset or Restore Defaults" class="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium flex items-center gap-1.5 active:scale-95 transition">
+          <i class="fa-solid fa-rotate-left text-amber-400"></i>
+          <span class="hidden sm:inline">Reset</span>
+        </button>
+      </div>
+
+      <!-- LIVE STICKY TELEMETRY BAR -->
+      <div class="grid grid-cols-4 gap-2 mt-3 pt-2.5 border-t border-slate-800/80 text-center">
+        <div class="bg-alpine-900/90 rounded-lg p-1.5 border border-slate-800">
+          <div class="text-[10px] font-mono uppercase text-slate-400">Intake</div>
+          <div class="text-xs sm:text-sm font-mono font-bold text-white"><span id="headerIntakeKcal">0</span> <span class="text-[10px] font-normal text-slate-400">/1800</span></div>
+        </div>
+        <div class="bg-alpine-900/90 rounded-lg p-1.5 border border-slate-800">
+          <div class="text-[10px] font-mono uppercase text-slate-400">Protein</div>
+          <div class="text-xs sm:text-sm font-mono font-bold text-emerald-400"><span id="headerProteinG">0</span>g <span class="text-[10px] font-normal text-slate-400">/180g</span></div>
+        </div>
+        <div class="bg-alpine-900/90 rounded-lg p-1.5 border border-slate-800">
+          <div class="text-[10px] font-mono uppercase text-slate-400">Total Burn</div>
+          <div class="text-xs sm:text-sm font-mono font-bold text-amber-400"><span id="headerTotalBurn">0</span> <span class="text-[10px] font-normal text-slate-400">kcal</span></div>
+        </div>
+        <div class="bg-alpine-900/90 rounded-lg p-1.5 border border-slate-800">
+          <div class="text-[10px] font-mono uppercase text-slate-400">Net Balance</div>
+          <div id="headerNetDeficit" class="text-xs sm:text-sm font-mono font-bold text-sky-400">0</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-xl mx-auto px-4 pt-4 space-y-5">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: DAILY TRACKER & EDITABLE CHECKLIST  -->
+    <!-- ========================================== -->
+    <section id="tab-planner" class="tab-section space-y-4">
+      
+      <!-- Phase Selector -->
+      <div class="bg-alpine-900 rounded-2xl p-3 border border-slate-800 shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">
+            <i class="fa-solid fa-layer-group mr-1"></i> Active Training Phase
+          </span>
+          <span id="activePhaseSubtitle" class="text-[11px] text-slate-400 font-medium">Weeks 1–4: Joint Priming</span>
+        </div>
+        <div class="grid grid-cols-4 gap-1.5" id="phaseButtonsContainer">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Day 1 to Day 7 Horizontal Pill Selector -->
+      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1" id="dayButtonsContainer">
+        <!-- Populated via JS -->
+      </div>
+
+      <!-- Live Day Progress Card -->
+      <div class="bg-gradient-to-br from-alpine-900 to-alpine-800 rounded-2xl p-4 border border-slate-700/70 shadow-xl space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 id="currentDayTitle" class="text-base font-bold text-white">Day 1: Chicken & Cottage Cheese</h2>
+            <p class="text-xs text-slate-400">Tap checkboxes as you complete meals & workouts, or tap <i class="fa-solid fa-pen text-emerald-400"></i> to customize on your Pixel.</p>
+          </div>
+          <button onclick="openModalForNewItem()" class="shrink-0 px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition">
+            <i class="fa-solid fa-plus"></i> Add Item
+          </button>
+        </div>
+
+        <!-- Calorie & Protein Progress Bars -->
+        <div class="space-y-2 pt-1">
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-medium text-slate-300">Checked Protein Floor (Leucine mTORC1 Trigger)</span>
+              <span class="font-mono font-bold text-emerald-400"><span id="barProteinText">0 / 180g</span> (<span id="leucineMealsCount">0</span>/4 boluses ≥35g)</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+              <div id="barProteinFill" class="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="font-medium text-slate-300">Checked Calorie Intake vs. 1,800 kcal Target</span>
+              <span class="font-mono font-bold text-sky-400" id="barCalorieText">0 / 1,800 kcal</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+              <div id="barCalorieFill" class="h-full bg-gradient-to-r from-sky-600 to-sky-400 transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meals Checklist Section -->
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-utensils text-emerald-400"></i> Daily Nutrition & 4-Bolus Protein Plan
+          </h3>
+          <span id="plannedDayMacrosLabel" class="text-[11px] font-mono text-slate-400">Planned: 0g P | 0 kcal</span>
+        </div>
+        <div id="mealsChecklistContainer" class="space-y-2.5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Exercise, Terrain & GI Protocol Checklist Section -->
+      <div class="space-y-2.5 pt-2">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5">
+            <i class="fa-solid fa-person-hiking text-amber-400"></i> Daily Conditioning, Tendon & GI Goals
+          </h3>
+          <span id="checkedExerciseBurnLabel" class="text-[11px] font-mono text-amber-400">Checked Burn: +0 kcal</span>
+        </div>
+        <div id="exerciseChecklistContainer" class="space-y-2.5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: METABOLIC & CALORIE INTELLIGENCE    -->
+    <!-- ========================================== -->
+    <section id="tab-calculator" class="tab-section hidden space-y-4">
+      
+      <!-- Biometric Profile Card -->
+      <div class="bg-alpine-900 rounded-2xl p-4 border border-slate-800 shadow-lg space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-gauge-high text-emerald-400"></i> Biometric & Metabolic Engine
+            </h2>
+            <p class="text-xs text-slate-400">Mifflin-St Jeor BMR + Live Compendium METs</p>
+          </div>
+          <span id="bmiBadge" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 font-mono text-xs font-bold">
+            BMI 40.0
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Current Weight (lbs)</label>
+            <input type="number" id="inputWeightLbs" step="0.5" min="120" max="500" onchange="updateProfileFromInputs()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-mono font-bold text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Ruck / Pack Load (lbs)</label>
+            <input type="number" id="inputPackLbs" step="1" min="0" max="100" onchange="updateProfileFromInputs()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-amber-400 font-mono font-bold text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Height (Inches)</label>
+            <input type="number" id="inputHeightIn" step="1" min="54" max="86" onchange="updateProfileFromInputs()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-mono font-bold text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Age (Years)</label>
+            <input type="number" id="inputAge" step="1" min="18" max="95" onchange="updateProfileFromInputs()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-mono font-bold text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Non-Exercise Daily Baseline</label>
+            <select id="inputActivityFactor" onchange="updateProfileFromInputs()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm font-medium focus:border-emerald-500 focus:outline-none">
+              <option value="1.2">Sedentary / Desk Work (1.2x BMR)</option>
+              <option value="1.3">Light Daily Movement (1.3x BMR)</option>
+              <option value="1.4">Active Daily Routine (1.4x BMR)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Metabolic Output Readout -->
+        <div class="grid grid-cols-3 gap-2 pt-2">
+          <div class="bg-slate-950/90 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] font-mono uppercase text-slate-400">Resting BMR</div>
+            <div id="calcBmrDisplay" class="text-base font-mono font-bold text-white mt-0.5">2,147 kcal</div>
+            <div class="text-[10px] text-slate-500">Mifflin-St Jeor</div>
+          </div>
+          <div class="bg-slate-950/90 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] font-mono uppercase text-slate-400">Base TDEE</div>
+            <div id="calcBaseTdeeDisplay" class="text-base font-mono font-bold text-sky-400 mt-0.5">2,576 kcal</div>
+            <div class="text-[10px] text-slate-500">Before Workouts</div>
+          </div>
+          <div class="bg-slate-950/90 p-3 rounded-xl border border-slate-800">
+            <div class="text-[10px] font-mono uppercase text-slate-400">FatMax HR Zone</div>
+            <div id="calcFatMaxHrDisplay" class="text-base font-mono font-bold text-emerald-400 mt-0.5">98–114 bpm</div>
+            <div class="text-[10px] text-slate-500">60–70% Max HR</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Energy Balance & 16-Week Weight Loss Projection -->
+      <div class="bg-gradient-to-br from-emerald-950/50 via-alpine-900 to-alpine-900 rounded-2xl p-4 border border-emerald-500/30 shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-scale-balanced text-emerald-400"></i> Live Energy Deficit & Nagano Projection
+          </h3>
+          <span class="text-[11px] font-mono text-emerald-300" id="activeDayIndicatorCalc">Day 1 Active</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
+          <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
+            <div class="text-[10px] font-mono text-slate-400 uppercase">Total Daily Burn</div>
+            <div id="summaryTotalTdee" class="text-sm sm:text-base font-mono font-extrabold text-amber-400 mt-0.5">2,850 kcal</div>
+            <div id="summaryExerciseAddon" class="text-[10px] text-slate-400">+274 kcal active</div>
+          </div>
+          <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
+            <div class="text-[10px] font-mono text-slate-400 uppercase">Effective Intake</div>
+            <div id="summaryEffectiveIntake" class="text-sm sm:text-base font-mono font-extrabold text-white mt-0.5">1,680 kcal</div>
+            <div id="summaryIntakeSource" class="text-[10px] text-slate-400">From Day Plan</div>
+          </div>
+          <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
+            <div class="text-[10px] font-mono text-slate-400 uppercase">Daily Deficit</div>
+            <div id="summaryDailyDeficit" class="text-sm sm:text-base font-mono font-extrabold text-emerald-400 mt-0.5">-1,170 kcal</div>
+            <div class="text-[10px] text-slate-400">Target: 750–1200</div>
+          </div>
+          <div class="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800">
+            <div class="text-[10px] font-mono text-slate-400 uppercase">Est. Weekly Loss</div>
+            <div id="summaryWeeklyLoss" class="text-sm sm:text-base font-mono font-extrabold text-sky-400 mt-0.5">2.34 lbs/wk</div>
+            <div id="summary16WkTotal" class="text-[10px] text-emerald-400 font-semibold">-37.4 lbs in 16w</div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 leading-relaxed">
+          <i class="fa-solid fa-circle-info text-emerald-400 mr-1"></i>
+          <strong>Patellofemoral Force Relief:</strong> Losing <span id="forceReliefLbs" class="text-white font-mono">30</span> lbs removes <span id="forceReliefTotal" class="text-emerald-400 font-mono font-bold">120 lbs</span> of compressive knee load on every single stair step at Nojiri-ko (4:1 kinetic multiplier).
+        </p>
+      </div>
+
+      <!-- Smart MET Exercise Expenditure Simulator -->
+      <div class="bg-alpine-900 rounded-2xl p-4 border border-slate-800 shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-person-running text-amber-400"></i> Smart MET Exercise Burn Calculator
+            </h3>
+            <p class="text-xs text-slate-400">Calculates exact kilocalories using <span class="font-mono text-slate-300">(MET × 3.5 × Total Kg) / 200 × mins</span></p>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-1">
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Select Terrain / Conditioning Activity</label>
+            <select id="metActivitySelect" onchange="updateMetSimulatorPreview()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:border-emerald-500 focus:outline-none">
+              <option value="3.8|Leif Erikson Flat Gravel Walk (FatMax Zone 2)|0">Leif Erikson Flat Gravel Walk (Zone 2) — 3.8 METs</option>
+              <option value="5.3|Wild Cherry / Alder Uneven Single-Track Hike|0">Wild Cherry / Alder Uneven Root Trail — 5.3 METs</option>
+              <option value="8.0|Mount Tabor Steep Stair Ascents (280 Steps)|0">Mount Tabor Steep Stair Ascents — 8.0 METs</option>
+              <option value="7.5|Weighted Trail Rucking (Includes Pack Weight)|1">Weighted Trail Rucking (Uses Pack Weight) — 7.5 METs</option>
+              <option value="8.5|500m Cabin Gear & Bedding Haul Simulation|1">500m Cabin Gear Haul Simulation — 8.5 METs</option>
+              <option value="5.0|25° Decline Eccentric Squats & Heavy Carries|0">25° Decline Squats & Farmer Carries — 5.0 METs</option>
+              <option value="6.5|Firewood Splitting & Rotational Ax Chops|0">Firewood Splitting & Rotational Chops — 6.5 METs</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 items-center">
+            <div>
+              <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Duration: <span id="metDurationLabel" class="text-emerald-400 font-bold">45</span> mins</label>
+              <input type="range" id="metDurationSlider" min="10" max="120" step="5" value="45" oninput="updateMetSimulatorPreview()" class="w-full h-2 bg-slate-800 rounded-lg cursor-pointer">
+            </div>
+            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-center">
+              <div class="text-[10px] font-mono uppercase text-slate-400">Calculated Burn</div>
+              <div id="metCalculatedBurnPreview" class="text-lg font-mono font-extrabold text-amber-400">+401 kcal</div>
+              <div id="metEffectiveWeightNote" class="text-[10px] text-slate-500">At 295 lbs</div>
+            </div>
+          </div>
+
+          <button onclick="addSimulatedExerciseToActiveDay()" class="w-full py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-semibold text-xs flex items-center justify-center gap-2 active:scale-98 transition">
+            <i class="fa-solid fa-plus-circle"></i> Log & Check Off on Current Day (<span class="activeDayNumberText">Day 1</span>)
+          </button>
+        </div>
+      </div>
+
+      <!-- Smart Natural-Language Food Parser & Macro Estimator -->
+      <div class="bg-alpine-900 rounded-2xl p-4 border border-slate-800 shadow-lg space-y-3">
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-wand-magic-sparkles text-sky-400"></i> Smart Food Parser & Quick Macro Estimator
+          </h3>
+          <p class="text-xs text-slate-400">Type ingredients (e.g. <span class="font-mono text-slate-300">"6 oz chicken, 1.5 cup cottage cheese, 2 eggs, 1 scoop whey"</span>) to auto-compute macros.</p>
+        </div>
+
+        <div class="space-y-2.5">
+          <input type="text" id="smartFoodInput" oninput="runSmartFoodParser()" placeholder="e.g., 6 oz salmon, 1 cup greek yogurt, 2 eggs..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-sm placeholder-slate-500 focus:border-sky-500 focus:outline-none">
+          
+          <div class="flex flex-wrap gap-1.5" id="quickFoodChips">
+            <button onclick="appendQuickFood('6 oz chicken breast')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">+ 6oz Chicken</button>
+            <button onclick="appendQuickFood('1.5 cup cottage cheese')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">+ 1.5c Cottage Cheese</button>
+            <button onclick="appendQuickFood('1.5 scoop whey')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">+ 1.5 Scoop Whey</button>
+            <button onclick="appendQuickFood('6 oz sirloin steak')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">+ 6oz Sirloin</button>
+            <button onclick="appendQuickFood('2 cans tuna')" class="text-[11px] px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">+ 2 Cans Tuna</button>
+          </div>
+
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div>
+              <div class="text-[10px] font-mono uppercase text-slate-400">Estimated Macros</div>
+              <div class="text-sm font-mono font-bold text-white mt-0.5">
+                <span id="smartParsedProtein" class="text-emerald-400">0</span>g Protein • <span id="smartParsedCalories" class="text-sky-400">0</span> kcal
+              </div>
+              <div id="smartParsedLeucineStatus" class="text-[10px] text-slate-500">Enter foods above to evaluate 35g leucine threshold</div>
+            </div>
+            <button onclick="addSmartParsedMealToDay()" class="px-3 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-xs font-bold active:scale-95 transition">
+              Add to <span class="activeDayNumberText">Day 1</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: 16-WEEK ROADMAP, KNEE & GEAR SPEC   -->
+    <!-- ========================================== -->
+    <section id="tab-protocols" class="tab-section hidden space-y-4">
+
+      <!-- 4-Phase Chronological Roadmap -->
+      <div class="bg-alpine-900 rounded-2xl p-4 border border-slate-800 shadow-lg space-y-3">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-route text-emerald-400"></i> 16-Week Portland-to-Nagano Roadmap
+        </h2>
+
+        <div class="space-y-3">
+          <!-- Phase 1 -->
+          <div class="p-3.5 rounded-xl bg-slate-950/90 border-l-4 border-emerald-500 border border-slate-800 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-mono uppercase font-bold text-emerald-400">Phase 1 • Weeks 1–4</span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Leif Erikson Drive</span>
+            </div>
+            <h3 class="text-sm font-bold text-white">Initiation, Medical Baseline & Tendon Priming</h3>
+            <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside leading-relaxed">
+              <li><strong>Medical & Nutrition:</strong> Initiate GLP-1/GIP titration. Lock in 160–210g daily protein (4 boluses of 35–45g) + daily hydration & PEG 3350/methylcellulose fiber.</li>
+              <li><strong>Aerobic Base:</strong> 3–4x weekly flat gravel walks on Leif Erikson Drive (30–45 mins in conversational FatMax Zone 2) for mitochondrial biogenesis without joint shear.</li>
+              <li><strong>Tendon & Strength:</strong> 25° decline eccentric single-leg squats (2–3 sets × 10–12 reps, 3–5s lowering, push up on 2 legs) + light farmer's carries & Romanian deadlifts 2x/wk.</li>
+            </ul>
+          </div>
+
+          <!-- Phase 2 -->
+          <div class="p-3.5 rounded-xl bg-slate-950/90 border-l-4 border-sky-500 border border-slate-800 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-mono uppercase font-bold text-sky-400">Phase 2 • Weeks 5–8</span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Wild Cherry / Alder Loop</span>
+            </div>
+            <h3 class="text-sm font-bold text-white">Dose Escalation & Uneven Proprioception</h3>
+            <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside leading-relaxed">
+              <li><strong>Proprioceptive Trails:</strong> Transition from flat gravel to dirt single-tracks with roots, mud, and undulating grades (Wild Cherry & Alder trails in Forest Park, 60 mins).</li>
+              <li><strong>Footwear Break-In:</strong> Acquire and break in rigid, deep-lugged boots (Salomon Quest 5 GTX or La Sportiva Ultra Raptor II Mid GTX).</li>
+              <li><strong>Strength Progression:</strong> Add 10–15 lb dumbbell/plate to 25° decline squats. Introduce rotational cable woodchoppers for torso/oblique conditioning.</li>
+            </ul>
+          </div>
+
+          <!-- Phase 3 -->
+          <div class="p-3.5 rounded-xl bg-slate-950/90 border-l-4 border-amber-500 border border-slate-800 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-mono uppercase font-bold text-amber-400">Phase 3 • Weeks 9–12</span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Mount Tabor Stairs</span>
+            </div>
+            <h3 class="text-sm font-bold text-white">Vertical Stair Capacity & Early Load Carriage</h3>
+            <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside leading-relaxed">
+              <li><strong>Vertical Ascents:</strong> Shift 1–2 cardio sessions/week to Mount Tabor Park stair climbs (up to 280 steps). Focus on steady rhythmic breathing and glute drive.</li>
+              <li><strong>Rucking Introduction:</strong> Add a 15–20 lb weighted backpack to one weekly trail hike to adapt axial skeleton and postural stabilizers.</li>
+              <li><strong>Heavy Carries:</strong> Progress trap-bar deadlifts, heavy farmer's carries, and asymmetric suitcase carries (Pallof presses).</li>
+            </ul>
+          </div>
+
+          <!-- Phase 4 -->
+          <div class="p-3.5 rounded-xl bg-slate-950/90 border-l-4 border-rose-500 border border-slate-800 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-mono uppercase font-bold text-rose-400">Phase 4 • Weeks 13–16</span>
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Full Cabin Simulation</span>
+            </div>
+            <h3 class="text-sm font-bold text-white">500m Haul Simulation, Ax Power & Cold Priming</h3>
+            <ul class="text-xs text-slate-300 space-y-1 list-disc list-inside leading-relaxed">
+              <li><strong>500m Cabin Haul:</strong> Execute 500-meter loaded carries on mixed grades holding 25–35 lbs (backpack + duffels) in broken-in boots.</li>
+              <li><strong>Firewood Mechanics:</strong> Explosive cable chops, sledgehammer tire slams, or rotational medicine ball throws for lats, grip, and obliques.</li>
+              <li><strong>Thermal Adaptation:</strong> Finish daily showers with 1–2 minutes of cold water to stimulate brown adipose tissue (BAT) and blunt cold-induced bronchospasm.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biomechanical Protocol: 25° Decline Eccentric Squat -->
+      <div class="bg-alpine-900 rounded-2xl p-4 border border-slate-800 shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-bone text-amber-400"></i> Patellar Tendon Shield: 25° Decline Squat
+          </h2>
+          <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Mandatory 2x/Wk</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Walking down steep mud or snow slopes in Nojiri-ko places massive eccentric braking forces on the patellar tendon. Using a <strong>25-degree slant board</strong> reduces calf tension and isolates the knee extensor mechanism, stimulating collagen cross-linking without exceeding safe patellofemoral cartilage compression limits.
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <div class="font-mono font-bold text-emerald-400 mb-1">1. Eccentric Down (1 Leg)</div>
+            <p class="text-slate-400">Stand on 25° decline board on ONE leg. Lower slowly over <strong>3 to 6 seconds</strong> with torso upright.</p>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <div class="font-mono font-bold text-amber-400 mb-1">2. Strict &lt;60° Angle Cap</div>
+            <p class="text-slate-400">Stop at <strong>45°–60° knee flexion</strong>. Deeper angles spike retropatellar shear at 295 lbs.</p>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <div class="font-mono font-bold text-sky-400 mb-1">3. Concentric Up (2 Legs)</div>
+            <p class="text-slate-400">Place your other foot down and push back to the top using <strong>BOTH legs</strong>. Perform 3×12 reps.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Technical Footwear & Traction Spec -->
+      <div class="bg-alpine-900 rounded-2xl p-4 border border-slate-800 shadow-lg space-y-3">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-boot-heeled text-sky-400"></i> Footwear & Traction Engineering Spec
+        </h2>
+        <p class="text-xs text-slate-400">
+          At 295 lbs + 30 lb gear load, soft EVA foam running shoes bottom out ("compression set") and allow ankle roll on slick volcanic mud. Use high-torsional-rigidity boots:
+        </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white text-sm">Salomon Quest 5 GTX</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Max Load Support</span>
+            </div>
+            <p class="text-slate-400"><strong>Chassis:</strong> 4D Advanced Chassis cradles heel & prevents lateral ankle inversion under 300+ lb total mass.</p>
+            <p class="text-slate-400"><strong>Outsole:</strong> Contagrip MD with deep multidirectional lugs for mud shedding.</p>
+          </div>
+          <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-white text-sm">La Sportiva Ultra Raptor II Mid</span>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/20 text-sky-300">Best Wet Rock/Mud Grip</span>
+            </div>
+            <p class="text-slate-400"><strong>Chassis:</strong> Anti-torsion TPU stabilizer + endurance platform (available in Wide fit).</p>
+            <p class="text-slate-400"><strong>Outsole:</strong> FriXion XF + Impact Brake System lags cut stopping distance on steep descents.</p>
+          </div>
+        </div>
+        <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 text-xs text-slate-300 flex items-start gap-2.5">
+          <i class="fa-solid fa-icicles text-sky-400 mt-0.5"></i>
+          <div>
+            <strong>Standing Snow & Ice Add-On:</strong> Pack slip-on elastomer chain cleats (<strong>Kahtoola MICROspikes</strong> or Hillsound Trail Crampons) + 250g/m² merino wool base layers and a 3-layer Gore-Tex shell.
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: MEDICAL, TELEHEALTH & GROCERY LIST  -->
+    <!-- ========================================== -->
+    <section id="tab-medical" class="tab-section hidden space-y-4">
+
+      <!-- Oregon Telemed vs. Ro Comparison Table -->
+      <div class="bg-alpine-900 rounded-2xl p-4 border border-slate-800 shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-user-doctor text-emerald-400"></i> Oregon Telemed vs. Ro (Telehealth)
+            </h2>
+            <p class="text-xs text-slate-400">Cost structure, route of administration, and 16-week velocity comparison</p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-950 text-slate-300 font-mono uppercase text-[10px]">
+              <tr>
+                <th class="p-2.5 border-b border-slate-800">Dimension</th>
+                <th class="p-2.5 border-b border-slate-800 text-emerald-400">Oregon Telemed</th>
+                <th class="p-2.5 border-b border-slate-800 text-sky-400">Ro (Body Program)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800 bg-slate-950/60 text-slate-300">
+              <tr>
+                <td class="p-2.5 font-semibold text-white">Medication Form</td>
+                <td class="p-2.5">Compounded sublingual tirzepatide (oral drops via Broadway Apothecary)</td>
+                <td class="p-2.5">FDA-approved subcutaneous autoinjectors (Zepbound, Wegovy)</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-semibold text-white">Upfront Cost</td>
+                <td class="p-2.5 font-mono text-emerald-300 font-bold">$475 total / first 60 days (~$238/mo all-in)</td>
+                <td class="p-2.5 font-mono text-sky-300 font-bold">$39 Month 1 fee + separate pharmacy cost</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-semibold text-white">Ongoing Monthly</td>
+                <td class="p-2.5 font-mono">~$194/mo ($390 billed every 60 days, includes med)</td>
+                <td class="p-2.5 font-mono">$149/mo fee + med ($298–$598+/mo cash, or copay)</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-semibold text-white">Insurance / PA</td>
+                <td class="p-2.5">Direct cash-pay only (no commercial insurance billing)</td>
+                <td class="p-2.5">Concierge Prior Authorization (PA) navigation included</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-semibold text-white">16-Week Velocity</td>
+                <td class="p-2.5">Needle-free convenience; sublingual bioavailability varies more than injection</td>
+                <td class="p-2.5">Gold-standard SURMOUNT-1 subcutaneous pharmacokinetics (fastest verified loss)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tirzepatide vs Semaglutide Clinical Callout -->
+        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1">
+          <div class="font-bold text-white flex items-center gap-1.5">
+            <i class="fa-solid fa-syringe text-emerald-400"></i> Clinical Pharmacokinetics: Tirzepatide vs. Semaglutide
+          </div>
+          <p class="text-slate-400 leading-relaxed">
+            In head-to-head trials (SURMOUNT vs. STEP), dual GIP/GLP-1 agonist <strong>Tirzepatide (Zepbound)</strong> achieved ~20.9% mean weight reduction vs ~14.9% for single-agonist <strong>Semaglutide (Wegovy)</strong>, with steeper early-phase loss in Weeks 1–16 (~10–12% body weight or <strong>~28–35 lbs</strong> from a 295 lb baseline).
+          </p>
+        </div>
+      </div>
+
+      <!-- GI Side-Effect Mitigation Protocol -->
+      <div class="bg-alpine-900 rounded-2xl p-4 border border-slate-800 shadow-lg space-y-2.5">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-shield-heart text-amber-400"></i> GLP-1 Gastrointestinal & Muscle Protection Rules
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-emerald-400 mb-1">1. Hydration Anchor (3.0L+/day)</div>
+            <p class="text-slate-400">Drink 16–20 oz water immediately upon waking and before each protein bolus to maintain preload and bowel transit.</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-sky-400 mb-1">2. Motility Support (PEG 3350)</div>
+            <p class="text-slate-400">Use non-fermentable soluble fiber (Citrucel/methylcellulose) + osmotic PEG 3350 (MiraLAX) as needed during dose escalations.</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-amber-400 mb-1">3. Avoid High-Fat Boluses</div>
+            <p class="text-slate-400">GLP-1s slow gastric emptying. Greasy/fried meals sit in the stomach and trigger sulfur burps, reflux, or nausea.</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
+            <div class="font-bold text-rose-400 mb-1">4. Liquid Protein Fallback</div>
+            <p class="text-slate-400">On days when solid meat feels too heavy, use whey isolate, Fairlife shakes, egg whites, and 0% Greek yogurt to hit 180g.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Weekly Grocery Checklist -->
+      <div class="bg-alpine-900 rounded-2xl p-4 border border-slate-800 shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-cart-shopping text-emerald-400"></i> Interactive Weekly Grocery Checklist
+            </h2>
+            <p class="text-xs text-slate-400">Tap items while shopping; state saves automatically on your Pixel.</p>
+          </div>
+          <button onclick="clearGroceryChecks()" class="text-xs font-mono text-slate-400 hover:text-white px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700">
+            Uncheck All
+          </button>
+        </div>
+
+        <div id="groceryCategoriesContainer" class="space-y-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- EDIT / ADD CHECKLIST ITEM MODAL            -->
+  <!-- ========================================== -->
+  <div id="itemEditorModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-alpine-900 w-full max-w-lg rounded-t-3xl sm:rounded-2xl border border-slate-700 shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="modalTitle" class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-emerald-400"></i> Edit Checklist Item
+        </h3>
+        <button onclick="closeItemModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="modalItemId">
+
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Item Category</label>
+            <select id="modalItemType" onchange="toggleModalFieldsByType()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:border-emerald-500 focus:outline-none">
+              <option value="meal">Meal / Nutrition Bolus</option>
+              <option value="exercise">Exercise / Conditioning / GI</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Slot / Label</label>
+            <input type="text" id="modalItemSlot" placeholder="e.g., Breakfast, Lunch, Trail..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-mono uppercase text-slate-400 mb-1">Menu Description or Exercise Details</label>
+          <textarea id="modalItemTitle" rows="3" placeholder="Enter meal items or exercise instructions..." class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-sm focus:border-emerald-500 focus:outline-none"></textarea>
+          <button type="button" id="modalAutoEstimateBtn" onclick="autoEstimateInsideModal()" class="mt-1.5 text-[11px] font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Estimate Protein & Calories from Description Text
+          </button>
+        </div>
+
+        <!-- Meal Specific Fields -->
+        <div id="modalMealFields" class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-emerald-400 mb-1">Protein (grams)</label>
+            <input type="number" id="modalItemProtein" min="0" max="250" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-emerald-400 font-mono font-bold text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-sky-400 mb-1">Calories (kcal)</label>
+            <input type="number" id="modalItemCalories" min="0" max="3000" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sky-400 font-mono font-bold text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Exercise Specific Fields -->
+        <div id="modalExerciseFields" class="hidden grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-amber-400 mb-1">Duration (Minutes)</label>
+            <input type="number" id="modalItemDuration" min="0" max="300" oninput="recalcModalExerciseBurn()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-mono font-bold text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-[11px] font-mono uppercase text-amber-400 mb-1">Intensity (METs)</label>
+            <input type="number" id="modalItemMets" step="0.1" min="1" max="15" oninput="recalcModalExerciseBurn()" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-white font-mono font-bold text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-[11px] font-mono uppercase text-amber-400 mb-1">Active Calorie Burn (kcal)</label>
+            <input type="number" id="modalItemBurn" min="0" max="3000" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-amber-400 font-mono font-bold text-sm focus:border-emerald-500 focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 pt-3 border-t border-slate-800">
+        <button type="button" id="modalDeleteBtn" onclick="deleteModalItem()" class="px-3.5 py-2.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 text-xs font-bold flex items-center gap-1.5">
+          <i class="fa-solid fa-trash-can"></i> Delete
+        </button>
+        <div class="flex items-center gap-2 ml-auto">
+          <button type="button" onclick="closeItemModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Cancel</button>
+          <button type="button" onclick="saveModalItem()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-lg">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- RESET CONFIRMATION MODAL (NO BROWSER ALERT)-->
+  <!-- ========================================== -->
+  <div id="resetConfirmModal" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-alpine-900 w-full max-w-sm rounded-2xl border border-slate-700 p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-white">Reset Checklist Options</h3>
+          <p class="text-xs text-slate-400">Choose what you would like to reset:</p>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <button onclick="uncheckCurrentDayOnly()" class="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold text-left flex items-center justify-between border border-slate-700">
+          <span>Uncheck Today's Completed Boxes Only</span>
+          <i class="fa-solid fa-square-check text-emerald-400"></i>
+        </button>
+        <button onclick="restoreFullFactoryDefaults()" class="w-full py-2.5 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-semibold text-left flex items-center justify-between border border-rose-500/30">
+          <span>Restore All 7 Days & Menus to Original Default</span>
+          <i class="fa-solid fa-rotate-left text-rose-400"></i>
+        </button>
+      </div>
+      <button onclick="closeResetModal()" class="w-full py-2 rounded-xl bg-slate-950 text-slate-400 text-xs font-semibold border border-slate-800">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- BOTTOM MOBILE TACTICAL NAVIGATION BAR      -->
+  <!-- ========================================== -->
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-alpine-950/95 backdrop-blur-md border-t border-slate-800 px-2 py-1.5">
+    <div class="max-w-xl mx-auto grid grid-cols-4 gap-1">
+      <button onclick="switchTab('planner')" id="nav-btn-planner" class="nav-tab-btn flex flex-col items-center justify-center py-2 rounded-xl text-emerald-400 bg-emerald-500/10 font-semibold transition">
+        <i class="fa-solid fa-list-check text-base mb-0.5"></i>
+        <span class="text-[11px]">Daily Plan</span>
+      </button>
+      <button onclick="switchTab('calculator')" id="nav-btn-calculator" class="nav-tab-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 font-medium transition">
+        <i class="fa-solid fa-fire-flame-curved text-base mb-0.5"></i>
+        <span class="text-[11px]">Calorie AI</span>
+      </button>
+      <button onclick="switchTab('protocols')" id="nav-btn-protocols" class="nav-tab-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 font-medium transition">
+        <i class="fa-solid fa-mountain text-base mb-0.5"></i>
+        <span class="text-[11px]">16W & Gear</span>
+      </button>
+      <button onclick="switchTab('medical')" id="nav-btn-medical" class="nav-tab-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 font-medium transition">
+        <i class="fa-solid fa-notes-medical text-base mb-0.5"></i>
+        <span class="text-[11px]">Med & Shop</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========================================== -->
+  <!-- APPLICATION LOGIC & INTELLIGENCE ENGINE    -->
+  <!-- ========================================== -->
+  <script>
+    const STORAGE_KEY = 'nojiriko_expedition_hub_v1';
+
+    // Phase Specific Default Exercise Templates
+    const PHASE_META = {
+      1: {
+        name: 'Phase 1 (Wks 1–4)',
+        subtitle: 'Weeks 1–4: Joint Priming & Leif Erikson Flat Zone 2',
+        exercises: [
+          { slot: 'Aerobic Base', title: 'Leif Erikson Drive Flat Gravel Walk (40 mins conversational FatMax Zone 2)', duration: 40, mets: 3.8 },
+          { slot: 'Tendon Shield', title: '25° Decline Single-Leg Eccentric Squats (3x12 reps, 4s lowering, <60° knee angle) + Light Farmer Carries', duration: 25, mets: 5.0 },
+          { slot: 'GI & Hydration', title: 'Hydration Anchor (20 oz water upon waking + pre-meal) & Soluble Fiber / PEG 3350 Check', duration: 5, mets: 1.5 }
+        ]
+      },
+      2: {
+        name: 'Phase 2 (Wks 5–8)',
+        subtitle: 'Weeks 5–8: Wild Cherry Uneven Single-Track & Boot Break-In',
+        exercises: [
+          { slot: 'Proprioception', title: 'Wild Cherry / Alder Trail Uneven Root & Mud Hike in Technical Boots (55 mins)', duration: 55, mets: 5.3 },
+          { slot: 'Loaded Tendon', title: '25° Decline Eccentric Squats (+10-15 lb weight) + Rotational Cable Woodchoppers', duration: 30, mets: 5.2 },
+          { slot: 'GI & Hydration', title: '3.0L Hydration + Dose Escalation GI Motility & Protein Bolus Check', duration: 5, mets: 1.5 }
+        ]
+      },
+      3: {
+        name: 'Phase 3 (Wks 9–12)',
+        subtitle: 'Weeks 9–12: Mt. Tabor 280 Stairs & 15–20 lb Rucking',
+        exercises: [
+          { slot: 'Vertical Ascent', title: 'Mount Tabor Steep Stair Climb Sessions or 20 lb Weighted Trail Ruck (50 mins)', duration: 50, mets: 7.8 },
+          { slot: 'Posterior Chain', title: 'Trap-Bar Deadlifts, Heavy Suitcase Carries & Decline Squat Maintenance', duration: 35, mets: 5.5 },
+          { slot: 'GI & Hydration', title: '3.0L Hydration + Electrolyte Replenishment & Lean Mass Retention Check', duration: 5, mets: 1.5 }
+        ]
+      },
+      4: {
+        name: 'Phase 4 (Wks 13–16)',
+        subtitle: 'Weeks 13–16: 500m 30 lb Cabin Hauls, Ax Chops & Cold Priming',
+        exercises: [
+          { slot: 'Cabin Haul Sim', title: '500m Loaded Cabin Gear & Bedding Carry Intervals (30 lb load on mixed incline, 50 mins)', duration: 50, mets: 8.5 },
+          { slot: 'Ax & Thermal', title: 'Explosive Rotational Ax / Sledge Chops + 2-Minute Cold Shower Thermogenesis Finish', duration: 30, mets: 6.5 },
+          { slot: 'GI & Gear Audit', title: '3.0L Hydration + Microspikes, Merino Base Layers & Boot Lacing Readiness Check', duration: 5, mets: 1.5 }
+        ]
+      }
+    };
+
+    // Pre-loaded 7-Day 180g Protein / ~1,700-1,800 kcal Meal Plan
+    const DEFAULT_7_DAY_MEALS = {
+      1: {
+        title: 'Day 1: Chicken & Cottage Cheese Foundation',
+        meals: [
+          { id: 'd1_m1', type: 'meal', slot: 'Breakfast', title: '1.5 cups (340g) low-fat cottage cheese + 1/2 cup fresh berries + 1 tbsp chia seeds', protein: 42, calories: 320, checked: false },
+          { id: 'd1_m2', type: 'meal', slot: 'Lunch', title: '6 oz grilled chicken breast + 2 cups baby spinach/greens + 1 tbsp light balsamic + 1/2 cup cooked brown rice', protein: 54, calories: 430, checked: false },
+          { id: 'd1_m3', type: 'meal', slot: 'Afternoon Bridge', title: 'Whey isolate shake (1.5 scoops in 10 oz water/almond milk) + 1 oz raw almonds (22 nuts)', protein: 40, calories: 320, checked: false },
+          { id: 'd1_m4', type: 'meal', slot: 'Dinner', title: '7 oz extra-lean (96/4) ground turkey taco bowl + 1/2 cup black beans + romaine, salsa & 2 tbsp 0% Greek yogurt', protein: 48, calories: 510, checked: false }
+        ]
+      },
+      2: {
+        title: 'Day 2: Eggs, Tuna & Lean Sirloin',
+        meals: [
+          { id: 'd2_m1', type: 'meal', slot: 'Breakfast', title: 'Scramble: 2 whole large eggs + 1 cup liquid egg whites + 1 slice Dave’s Killer Bread toast + 1/4 avocado', protein: 40, calories: 390, checked: false },
+          { id: 'd2_m2', type: 'meal', slot: 'Lunch', title: '2 cans (5 oz each) chunk light tuna + 1 tbsp light mayo & 2 tbsp 0% Greek yogurt over 2 cups greens or high-fiber wrap', protein: 56, calories: 380, checked: false },
+          { id: 'd2_m3', type: 'meal', slot: 'Afternoon Bridge', title: '1 cup (227g) 0% plain Greek yogurt + 1/2 scoop vanilla whey isolate stirred in', protein: 38, calories: 210, checked: false },
+          { id: 'd2_m4', type: 'meal', slot: 'Dinner', title: '6 oz lean top sirloin steak + 1 medium baked potato (150g) with 1 tsp butter + 2 cups roasted broccoli', protein: 48, calories: 580, checked: false }
+        ]
+      },
+      3: {
+        title: 'Day 3: Greek Yogurt, Turkey Wrap & Wild Salmon',
+        meals: [
+          { id: 'd3_m1', type: 'meal', slot: 'Breakfast', title: '1.5 cups (340g) 0% Greek yogurt + 1 scoop whey isolate stirred in + 1 sliced apple with cinnamon', protein: 48, calories: 380, checked: false },
+          { id: 'd3_m2', type: 'meal', slot: 'Lunch', title: '6 oz sliced deli roast turkey breast + 1 slice Swiss cheese on Mission Carb Balance wrap + 1 cup carrots & 2 tbsp hummus', protein: 48, calories: 420, checked: false },
+          { id: 'd3_m3', type: 'meal', slot: 'Afternoon Bridge', title: '1.5 cups 2% cottage cheese + 1 sliced peach or 1/2 cup drained pineapple', protein: 38, calories: 270, checked: false },
+          { id: 'd3_m4', type: 'meal', slot: 'Dinner', title: '6 oz wild Alaskan salmon fillet + 1/2 cup cooked jasmine rice + 2 cups steamed green beans with lemon', protein: 44, calories: 520, checked: false }
+        ]
+      },
+      4: {
+        title: 'Day 4: Proats, Rotisserie Chicken & Pork Tenderloin',
+        meals: [
+          { id: 'd4_m1', type: 'meal', slot: 'Breakfast', title: '1/2 cup rolled oats cooked in water + 1.5 scoops whey isolate stirred in after cooking + 1 tbsp peanut butter', protein: 44, calories: 390, checked: false },
+          { id: 'd4_m2', type: 'meal', slot: 'Lunch', title: '6 oz skinless rotisserie chicken breast + 1 cup roasted sweet potato wedges + steamed zucchini', protein: 48, calories: 440, checked: false },
+          { id: 'd4_m3', type: 'meal', slot: 'Afternoon Bridge', title: '2 hard-boiled eggs + 3 slices deli turkey roll-ups + 1 low-fat mozzarella string cheese', protein: 32, calories: 260, checked: false },
+          { id: 'd4_m4', type: 'meal', slot: 'Dinner', title: '7 oz center-cut lean pork tenderloin + 1 cup roasted cauliflower florets + 1/2 cup cooked quinoa', protein: 50, calories: 520, checked: false }
+        ]
+      },
+      5: {
+        title: 'Day 5: Egg White Omelet, Turkey Burgers & White Fish',
+        meals: [
+          { id: 'd5_m1', type: 'meal', slot: 'Breakfast', title: 'Omelet: 1.25 cups liquid egg whites + 1 whole egg + spinach, mushrooms, 1 oz feta + 1 slice sprouted toast', protein: 42, calories: 360, checked: false },
+          { id: 'd5_m2', type: 'meal', slot: 'Lunch', title: '2 lean turkey burger patties (8 oz total 93/7 turkey) on thin high-fiber bun + side salad with light vinaigrette', protein: 50, calories: 450, checked: false },
+          { id: 'd5_m3', type: 'meal', slot: 'Afternoon Bridge', title: '1 cup 0% Greek yogurt + 1 scoop chocolate whey protein + 1/2 sliced banana', protein: 42, calories: 290, checked: false },
+          { id: 'd5_m4', type: 'meal', slot: 'Dinner', title: '8 oz baked cod or halibut with lemon & dill + 1 medium sweet potato (150g) + 2 cups roasted Brussels sprouts', protein: 48, calories: 520, checked: false }
+        ]
+      },
+      6: {
+        title: 'Day 6: Cottage Bowl, Flank Steak Stir-Fry & Chicken',
+        meals: [
+          { id: 'd6_m1', type: 'meal', slot: 'Breakfast', title: '1.5 cups low-fat cottage cheese + 1/2 cup diced melon + 2 tbsp chopped walnuts', protein: 40, calories: 380, checked: false },
+          { id: 'd6_m2', type: 'meal', slot: 'Lunch', title: '6 oz lean flank steak stir-fry + 2 cups broccoli, snap peas, bell peppers in low-sodium soy + 1/2 cup brown rice', protein: 48, calories: 470, checked: false },
+          { id: 'd6_m3', type: 'meal', slot: 'Afternoon Bridge', title: 'Ready-to-drink Fairlife Core Power Elite (42g) OR Premier Protein (30g) + 1 string cheese', protein: 40, calories: 230, checked: false },
+          { id: 'd6_m4', type: 'meal', slot: 'Dinner', title: '6 oz trimmed boneless skinless chicken thighs + 1 cup rosemary red potatoes + 2 cups garden salad', protein: 44, calories: 540, checked: false }
+        ]
+      },
+      7: {
+        title: 'Day 7: Weekend Scramble, Salmon Lentil Bowl & Zoodles',
+        meals: [
+          { id: 'd7_m1', type: 'meal', slot: 'Breakfast', title: '3 whole eggs + 1/2 cup egg whites scrambled + 3 links turkey breakfast sausage + 1 orange', protein: 44, calories: 430, checked: false },
+          { id: 'd7_m2', type: 'meal', slot: 'Lunch', title: '6 oz canned wild salmon (drained) over 1 cup cooked lentils with red onion, lemon juice & capers', protein: 50, calories: 460, checked: false },
+          { id: 'd7_m3', type: 'meal', slot: 'Afternoon Bridge', title: '1.25 cups 0% Greek yogurt + 1 tsp honey + 1 tbsp chia seeds', protein: 32, calories: 230, checked: false },
+          { id: 'd7_m4', type: 'meal', slot: 'Dinner', title: '7 oz extra-lean (96/4) ground beef in marinara over 2 cups zucchini noodles + 2 tbsp grated parmesan', protein: 52, calories: 490, checked: false }
+        ]
+      }
+    };
+
+    const DEFAULT_GROCERY_LIST = [
+      { category: 'Poultry & Lean Meat', items: [
+        { id: 'g1', name: '2–3 lbs boneless skinless chicken breast', checked: false },
+        { id: 'g2', name: '2 lbs 93/7 or 96/4 lean ground turkey or beef', checked: false },
+        { id: 'g3', name: '1.5 lbs lean top sirloin, flank steak, or pork tenderloin', checked: false },
+        { id: 'g4', name: '1 pkg uncured turkey breakfast sausage & deli turkey breast', checked: false }
+      ]},
+      { category: 'Fish & Seafood', items: [
+        { id: 'g5', name: '4 cans chunk light tuna in water (5 oz each)', checked: false },
+        { id: 'g6', name: '2 cans wild Alaskan salmon + 1 lb fresh/frozen salmon fillet', checked: false },
+        { id: 'g7', name: '1–2 lbs cod, halibut, or tilapia fillets', checked: false }
+      ]},
+      { category: 'Dairy & Egg Proteins', items: [
+        { id: 'g8', name: '2 cartons (32 oz each) liquid egg whites + 1 dozen whole eggs', checked: false },
+        { id: 'g9', name: '2 large tubs (32 oz) 0% plain Greek yogurt (Fage / Chobani)', checked: false },
+        { id: 'g10', name: '2 tubs (24 oz) low-fat cottage cheese + 1 pkg string cheese', checked: false }
+      ]},
+      { category: 'Produce & Slow Carbs', items: [
+        { id: 'g11', name: 'Baby spinach, spring greens, romaine, broccoli, Brussels sprouts', checked: false },
+        { id: 'g12', name: 'Sweet potatoes, red potatoes, zucchini, berries, apples', checked: false }
+      ]},
+      { category: 'Pantry, Fiber & GI Kit', items: [
+        { id: 'g13', name: 'Whey protein isolate powder + Fairlife Core Power shakes', checked: false },
+        { id: 'g14', name: 'Mission Carb Balance wraps, rolled oats, quinoa, brown rice, black beans', checked: false },
+        { id: 'g15', name: 'Citrucel (methylcellulose soluble fiber), MiraLAX (PEG 3350), electrolytes', checked: false }
+      ]}
+    ];
+
+    // Application State
+    let appState = null;
+
+    function calculateBurnFromMets(mets, durationMins, weightLbs, packLbs = 0) {
+      const totalKg = (Number(weightLbs) + Number(packLbs)) / 2.20462;
+      return Math.round(((Number(mets) * 3.5 * totalKg) / 200) * Number(durationMins));
+    }
+
+    function buildDefaultState() {
+      const profile = {
+        weightLbs: 295,
+        packLbs: 15,
+        heightIn: 72,
+        age: 61,
+        sex: 'male',
+        activityFactor: 1.2
+      };
+
+      const daysData = {};
+      for (let d = 1; d <= 7; d++) {
+        const mealCopies = JSON.parse(JSON.stringify(DEFAULT_7_DAY_MEALS[d].meals));
+        const phaseExTemplates = PHASE_META[1].exercises;
+        const exercises = phaseExTemplates.map((ex, idx) => ({
+          id: `d${d}_ex${idx + 1}`,
+          type: 'exercise',
+          slot: ex.slot,
+          title: ex.title,
+          duration: ex.duration,
+          mets: ex.mets,
+          burn: calculateBurnFromMets(ex.mets, ex.duration, profile.weightLbs, 0),
+          checked: false
+        }));
+
+        daysData[d] = {
+          title: DEFAULT_7_DAY_MEALS[d].title,
+          items: [...mealCopies, ...exercises]
+        };
+      }
+
+      return {
+        activePhase: 1,
+        activeDay: 1,
+        profile,
+        days: daysData,
+        groceries: JSON.parse(JSON.stringify(DEFAULT_GROCERY_LIST))
+      };
+    }
+
+    function loadAppState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          appState = JSON.parse(raw);
+          if (!appState.profile || !appState.days) {
+            appState = buildDefaultState();
+          }
+        } else {
+          appState = buildDefaultState();
+        }
+      } catch (e) {
+        appState = buildDefaultState();
+      }
+    }
+
+    function saveAppState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        const badge = document.getElementById('syncStatusBadge');
+        if (badge) {
+          badge.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> Saved`;
+        }
+      } catch (e) {
+        console.error('Storage save error:', e);
+      }
+    }
+
+    // Metabolic Engine Calculations
+    function getMetabolicMetrics() {
+      const p = appState.profile;
+      const weightKg = p.weightLbs / 2.20462;
+      const heightCm = p.heightIn * 2.54;
+      const heightM = heightCm / 100;
+      const bmi = p.weightLbs / (heightM * heightM * 2.20462);
+
+      // Mifflin-St Jeor (Male)
+      const bmr = Math.round(10 * weightKg + 6.25 * heightCm - 5 * p.age + 5);
+      const baseTdee = Math.round(bmr * p.activityFactor);
+      const maxHr = 220 - p.age;
+      const fatMaxLow = Math.round(maxHr * 0.60);
+      const fatMaxHigh = Math.round(maxHr * 0.70);
+
+      return { bmr, baseTdee, bmi, fatMaxLow, fatMaxHigh, weightKg };
+    }
+
+    // Render Phase Selector Buttons
+    function renderPhaseButtons() {
+      const container = document.getElementById('phaseButtonsContainer');
+      const subtitle = document.getElementById('activePhaseSubtitle');
+      subtitle.textContent = PHASE_META[appState.activePhase].subtitle;
+
+      let html = '';
+      for (let p = 1; p <= 4; p++) {
+        const isActive = appState.activePhase === p;
+        html += `
+          <button onclick="selectPhase(${p})" class="py-2 px-2 rounded-xl font-mono text-xs font-bold transition border ${
+            isActive
+              ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md'
+              : 'bg-slate-950/90 text-slate-400 border-slate-800 hover:text-white'
+          }">
+            Phase ${p}
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    // Switch Training Phase & optionally update unchecked default exercises
+    function selectPhase(phaseNum) {
+      appState.activePhase = phaseNum;
+      const templates = PHASE_META[phaseNum].exercises;
+      const usePack = phaseNum >= 3 ? appState.profile.packLbs : 0;
+
+      // Update standard exercise slots for the current day so user immediately sees phase-appropriate drills
+      const dayObj = appState.days[appState.activeDay];
+      const existingExercises = dayObj.items.filter(i => i.type === 'exercise');
+      templates.forEach((tpl, idx) => {
+        if (existingExercises[idx]) {
+          existingExercises[idx].slot = tpl.slot;
+          existingExercises[idx].title = tpl.title;
+          existingExercises[idx].duration = tpl.duration;
+          existingExercises[idx].mets = tpl.mets;
+          existingExercises[idx].burn = calculateBurnFromMets(tpl.mets, tpl.duration, appState.profile.weightLbs, idx === 0 ? usePack : 0);
+        }
+      });
+
+      saveAppState();
+      renderAll();
+    }
+
+    // Render Day 1 - Day 7 Pills
+    function renderDayButtons() {
+      const container = document.getElementById('dayButtonsContainer');
+      let html = '';
+      for (let d = 1; d <= 7; d++) {
+        const isActive = appState.activeDay === d;
+        const dayItems = appState.days[d].items;
+        const completedCount = dayItems.filter(i => i.checked).length;
+        const totalCount = dayItems.length;
+
+        html += `
+          <button onclick="selectDay(${d})" class="shrink-0 px-3.5 py-2 rounded-xl font-mono text-xs font-bold transition flex items-center gap-1.5 border ${
+            isActive
+              ? 'bg-sky-500 text-slate-950 border-sky-400 shadow-md'
+              : 'bg-alpine-900 text-slate-300 border-slate-800 hover:border-slate-700'
+          }">
+            <span>Day ${d}</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-slate-950/25 text-slate-950' : 'bg-slate-800 text-slate-400'}">${completedCount}/${totalCount}</span>
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+
+      document.querySelectorAll('.activeDayNumberText').forEach(el => {
+        el.textContent = `Day ${appState.activeDay}`;
+      });
+      const calcDayInd = document.getElementById('activeDayIndicatorCalc');
+      if (calcDayInd) calcDayInd.textContent = `Day ${appState.activeDay} Active`;
+    }
+
+    function selectDay(dayNum) {
+      appState.activeDay = dayNum;
+      saveAppState();
+      renderAll();
+    }
+
+    // Render Meals & Exercises Checklists
+    function renderChecklists() {
+      const dayObj = appState.days[appState.activeDay];
+      document.getElementById('currentDayTitle').textContent = dayObj.title;
+
+      const meals = dayObj.items.filter(i => i.type === 'meal');
+      const exercises = dayObj.items.filter(i => i.type === 'exercise');
+
+      // Planned totals
+      const plannedProtein = meals.reduce((sum, m) => sum + Number(m.protein || 0), 0);
+      const plannedKcal = meals.reduce((sum, m) => sum + Number(m.calories || 0), 0);
+      document.getElementById('plannedDayMacrosLabel').textContent = `Planned: ${plannedProtein}g P | ${plannedKcal} kcal`;
+
+      const mealsContainer = document.getElementById('mealsChecklistContainer');
+      mealsContainer.innerHTML = meals.map(meal => {
+        const meetsLeucine = Number(meal.protein) >= 35;
+        return `
+          <div class="rounded-2xl p-3.5 border transition ${
+            meal.checked
+              ? 'bg-emerald-950/25 border-emerald-500/40'
+              : 'bg-alpine-900 border-slate-800'
+          }">
+            <div class="flex items-start gap-3">
+              <button onclick="toggleChecklistItem('${meal.id}')" class="mt-0.5 w-7 h-7 rounded-xl flex items-center justify-center shrink-0 border transition active:scale-90 ${
+                meal.checked
+                  ? 'bg-emerald-500 border-emerald-400 text-slate-950'
+                  : 'bg-slate-950 border-slate-700 text-transparent hover:border-emerald-500/50'
+              }">
+                <i class="fa-solid fa-check text-sm"></i>
+              </button>
+
+              <div class="flex-1 min-w-0 cursor-pointer" onclick="toggleChecklistItem('${meal.id}')">
+                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                  <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-emerald-400 font-semibold">${escapeHtml(meal.slot)}</span>
+                  <span class="text-xs font-mono font-bold text-white">${meal.protein}g P</span>
+                  <span class="text-xs font-mono text-sky-400">• ${meal.calories} kcal</span>
+                  ${meetsLeucine ? `<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" title="Triggers mTORC1 Leucine Threshold">✓ Leucine ≥35g</span>` : ''}
+                </div>
+                <p class="text-xs sm:text-sm leading-relaxed ${meal.checked ? 'line-through text-slate-400' : 'text-slate-200'}">${escapeHtml(meal.title)}</p>
+              </div>
+
+              <button onclick="openItemEditor('${meal.id}')" title="Edit Meal" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 flex items-center justify-center shrink-0 border border-slate-700 active:scale-95">
+                <i class="fa-solid fa-pen text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const exContainer = document.getElementById('exerciseChecklistContainer');
+      exContainer.innerHTML = exercises.map(ex => {
+        return `
+          <div class="rounded-2xl p-3.5 border transition ${
+            ex.checked
+              ? 'bg-amber-950/25 border-amber-500/40'
+              : 'bg-alpine-900 border-slate-800'
+          }">
+            <div class="flex items-start gap-3">
+              <button onclick="toggleChecklistItem('${ex.id}')" class="mt-0.5 w-7 h-7 rounded-xl flex items-center justify-center shrink-0 border transition active:scale-90 ${
+                ex.checked
+                  ? 'bg-amber-500 border-amber-400 text-slate-950'
+                  : 'bg-slate-950 border-slate-700 text-transparent hover:border-amber-500/50'
+              }">
+                <i class="fa-solid fa-check text-sm"></i>
+              </button>
+
+              <div class="flex-1 min-w-0 cursor-pointer" onclick="toggleChecklistItem('${ex.id}')">
+                <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                  <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-amber-400 font-semibold">${escapeHtml(ex.slot)}</span>
+                  <span class="text-xs font-mono font-bold text-amber-400">+${ex.burn} kcal</span>
+                  <span class="text-[11px] font-mono text-slate-400">• ${ex.duration}m (${ex.mets} METs)</span>
+                </div>
+                <p class="text-xs sm:text-sm leading-relaxed ${ex.checked ? 'line-through text-slate-400' : 'text-slate-200'}">${escapeHtml(ex.title)}</p>
+              </div>
+
+              <button onclick="openItemEditor('${ex.id}')" title="Edit Exercise" class="w-9 h-9 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 flex items-center justify-center shrink-0 border border-slate-700 active:scale-95">
+                <i class="fa-solid fa-pen text-xs"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleChecklistItem(itemId) {
+      const dayObj = appState.days[appState.activeDay];
+      const target = dayObj.items.find(i => i.id === itemId);
+      if (target) {
+        target.checked = !target.checked;
+        saveAppState();
+        renderAll();
+      }
+    }
+
+    // Update Telemetry Header, Progress Bars & Calorie Calculator Tab
+    function renderTelemetryAndCalculator() {
+      const metrics = getMetabolicMetrics();
+      const dayObj = appState.days[appState.activeDay];
+
+      const meals = dayObj.items.filter(i => i.type === 'meal');
+      const exercises = dayObj.items.filter(i => i.type === 'exercise');
+
+      const checkedMeals = meals.filter(m => m.checked);
+      const checkedExercises = exercises.filter(e => e.checked);
+
+      const checkedProtein = checkedMeals.reduce((s, m) => s + Number(m.protein || 0), 0);
+      const checkedKcal = checkedMeals.reduce((s, m) => s + Number(m.calories || 0), 0);
+      const leucineBoluses = checkedMeals.filter(m => Number(m.protein) >= 35).length;
+
+      const plannedKcal = meals.reduce((s, m) => s + Number(m.calories || 0), 0);
+      const checkedExBurn = checkedExercises.reduce((s, e) => s + Number(e.burn || 0), 0);
+      const plannedExBurn = exercises.reduce((s, e) => s + Number(e.burn || 0), 0);
+
+      // Total Burn combines Base TDEE + Checked Exercise (or Planned Exercise on Calculator if none checked yet)
+      const liveTotalBurn = metrics.baseTdee + checkedExBurn;
+
+      // For deficit projection: use Checked Intake if user has checked at least 1 meal, else show Planned Day Intake so calculator is always informative
+      const effectiveIntake = checkedMeals.length > 0 ? checkedKcal : plannedKcal;
+      const effectiveBurnForSummary = checkedExercises.length > 0 ? (metrics.baseTdee + checkedExBurn) : (metrics.baseTdee + plannedExBurn);
+      const netBalance = effectiveIntake - effectiveBurnForSummary;
+      const dailyDeficitMag = effectiveBurnForSummary - effectiveIntake;
+      const weeklyLossLbs = (dailyDeficitMag * 7) / 3500;
+      const sixteenWeekLoss = weeklyLossLbs * 16;
+
+      // Sticky Header Updates
+      document.getElementById('headerIntakeKcal').textContent = checkedKcal;
+      document.getElementById('headerProteinG').textContent = checkedProtein;
+      document.getElementById('headerTotalBurn').textContent = liveTotalBurn;
+      const netEl = document.getElementById('headerNetDeficit');
+      netEl.textContent = `${netBalance > 0 ? '+' : ''}${netBalance}`;
+      netEl.className = `text-xs sm:text-sm font-mono font-bold ${netBalance <= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+      // Progress Bars
+      const protPct = Math.min(100, Math.round((checkedProtein / 180) * 100));
+      const calPct = Math.min(100, Math.round((checkedKcal / 1800) * 100));
+      document.getElementById('barProteinText').textContent = `${checkedProtein} / 180g`;
+      document.getElementById('leucineMealsCount').textContent = leucineBoluses;
+      document.getElementById('barProteinFill').style.width = `${protPct}%`;
+      document.getElementById('barCalorieText').textContent = `${checkedKcal} / 1,800 kcal`;
+      document.getElementById('barCalorieFill').style.width = `${calPct}%`;
+      document.getElementById('checkedExerciseBurnLabel').textContent = `Checked Burn: +${checkedExBurn} kcal`;
+
+      // Populate Calculator Inputs
+      document.getElementById('inputWeightLbs').value = appState.profile.weightLbs;
+      document.getElementById('inputPackLbs').value = appState.profile.packLbs;
+      document.getElementById('inputHeightIn').value = appState.profile.heightIn;
+      document.getElementById('inputAge').value = appState.profile.age;
+      document.getElementById('inputActivityFactor').value = appState.profile.activityFactor;
+
+      document.getElementById('bmiBadge').textContent = `BMI ${metrics.bmi.toFixed(1)}`;
+      document.getElementById('calcBmrDisplay').textContent = `${metrics.bmr.toLocaleString()} kcal`;
+      document.getElementById('calcBaseTdeeDisplay').textContent = `${metrics.baseTdee.toLocaleString()} kcal`;
+      document.getElementById('calcFatMaxHrDisplay').textContent = `${metrics.fatMaxLow}–${metrics.fatMaxHigh} bpm`;
+
+      // Summary Projection Cards
+      document.getElementById('summaryTotalTdee').textContent = `${effectiveBurnForSummary.toLocaleString()} kcal`;
+      document.getElementById('summaryExerciseAddon').textContent = checkedExercises.length > 0
+        ? `+${checkedExBurn} kcal checked`
+        : `+${plannedExBurn} kcal planned`;
+
+      document.getElementById('summaryEffectiveIntake').textContent = `${effectiveIntake.toLocaleString()} kcal`;
+      document.getElementById('summaryIntakeSource').textContent = checkedMeals.length > 0
+        ? `${checkedMeals.length} meal(s) checked`
+        : `Full Day ${appState.activeDay} plan`;
+
+      document.getElementById('summaryDailyDeficit').textContent = `${netBalance} kcal`;
+      document.getElementById('summaryWeeklyLoss').textContent = `${Math.max(0, weeklyLossLbs).toFixed(2)} lbs/wk`;
+      document.getElementById('summary16WkTotal').textContent = `-${Math.max(0, sixteenWeekLoss).toFixed(1)} lbs in 16w`;
+
+      const projectedLossRounded = Math.max(10, Math.round(sixteenWeekLoss));
+      document.getElementById('forceReliefLbs').textContent = projectedLossRounded;
+      document.getElementById('forceReliefTotal').textContent = `${projectedLossRounded * 4} lbs`;
+
+      updateMetSimulatorPreview();
+    }
+
+    function updateProfileFromInputs() {
+      const w = parseFloat(document.getElementById('inputWeightLbs').value) || 295;
+      const pack = parseFloat(document.getElementById('inputPackLbs').value) || 0;
+      const h = parseFloat(document.getElementById('inputHeightIn').value) || 72;
+      const age = parseInt(document.getElementById('inputAge').value, 10) || 61;
+      const act = parseFloat(document.getElementById('inputActivityFactor').value) || 1.2;
+
+      appState.profile.weightLbs = w;
+      appState.profile.packLbs = pack;
+      appState.profile.heightIn = h;
+      appState.profile.age = age;
+      appState.profile.activityFactor = act;
+
+      // Dynamically recalculate exercise burns across all days for accuracy
+      for (let d = 1; d <= 7; d++) {
+        appState.days[d].items.forEach(item => {
+          if (item.type === 'exercise' && item.mets && item.duration) {
+            const usesPack = item.title.toLowerCase().includes('ruck') || item.title.toLowerCase().includes('haul');
+            item.burn = calculateBurnFromMets(item.mets, item.duration, w, usesPack ? pack : 0);
+          }
+        });
+      }
+
+      saveAppState();
+      renderAll();
+    }
+
+    // Smart MET Simulator Preview
+    function updateMetSimulatorPreview() {
+      const selectVal = document.getElementById('metActivitySelect').value;
+      const [metsStr, title, usesPackFlag] = selectVal.split('|');
+      const mets = parseFloat(metsStr);
+      const duration = parseInt(document.getElementById('metDurationSlider').value, 10) || 45;
+      const usesPack = usesPackFlag === '1';
+
+      document.getElementById('metDurationLabel').textContent = duration;
+      const packLbs = usesPack ? appState.profile.packLbs : 0;
+      const burn = calculateBurnFromMets(mets, duration, appState.profile.weightLbs, packLbs);
+
+      document.getElementById('metCalculatedBurnPreview').textContent = `+${burn} kcal`;
+      document.getElementById('metEffectiveWeightNote').textContent = usesPack
+        ? `At ${appState.profile.weightLbs} + ${packLbs} lb pack`
+        : `At ${appState.profile.weightLbs} lbs body weight`;
+    }
+
+    function addSimulatedExerciseToActiveDay() {
+      const selectVal = document.getElementById('metActivitySelect').value;
+      const [metsStr, title, usesPackFlag] = selectVal.split('|');
+      const mets = parseFloat(metsStr);
+      const duration = parseInt(document.getElementById('metDurationSlider').value, 10) || 45;
+      const packLbs = usesPackFlag === '1' ? appState.profile.packLbs : 0;
+      const burn = calculateBurnFromMets(mets, duration, appState.profile.weightLbs, packLbs);
+
+      const newEx = {
+        id: 'ex_' + Date.now(),
+        type: 'exercise',
+        slot: 'Logged Workout',
+        title: `${title} (${duration} mins${packLbs > 0 ? `, +${packLbs}lb pack` : ''})`,
+        duration,
+        mets,
+        burn,
+        checked: true
+      };
+
+      appState.days[appState.activeDay].items.push(newEx);
+      saveAppState();
+      renderAll();
+      switchTab('planner');
+    }
+
+    // Smart Natural-Language Food Parser
+    const FOOD_DATABASE = [
+      { keywords: ['chicken thigh'], unit: 'oz', baseQty: 6, p: 42, cal: 280 },
+      { keywords: ['chicken', 'rotisserie'], unit: 'oz', baseQty: 6, p: 52, cal: 280 },
+      { keywords: ['turkey', 'burger'], unit: 'oz', baseQty: 6, p: 42, cal: 270 },
+      { keywords: ['sirloin', 'steak', 'flank', 'beef'], unit: 'oz', baseQty: 6, p: 46, cal: 330 },
+      { keywords: ['pork'], unit: 'oz', baseQty: 6, p: 44, cal: 260 },
+      { keywords: ['salmon'], unit: 'oz', baseQty: 6, p: 40, cal: 340 },
+      { keywords: ['cod', 'halibut', 'tilapia', 'white fish', 'fish'], unit: 'oz', baseQty: 6, p: 38, cal: 190 },
+      { keywords: ['tuna'], unit: 'can', baseQty: 1, p: 28, cal: 130 },
+      { keywords: ['cottage'], unit: 'cup', baseQty: 1, p: 28, cal: 180 },
+      { keywords: ['greek yogurt', 'yogurt', 'fage'], unit: 'cup', baseQty: 1, p: 24, cal: 130 },
+      { keywords: ['egg white'], unit: 'cup', baseQty: 1, p: 26, cal: 125 },
+      { keywords: ['egg'], unit: 'whole', baseQty: 1, p: 6, cal: 72 },
+      { keywords: ['whey', 'scoop', 'protein powder', 'shake'], unit: 'scoop', baseQty: 1, p: 25, cal: 120 },
+      { keywords: ['fairlife'], unit: 'bottle', baseQty: 1, p: 42, cal: 230 },
+      { keywords: ['rice', 'quinoa', 'oats', 'oatmeal'], unit: 'cup', baseQty: 1, p: 6, cal: 210 },
+      { keywords: ['potato', 'sweet potato'], unit: 'medium', baseQty: 1, p: 4, cal: 150 },
+      { keywords: ['beans', 'lentils', 'chickpeas'], unit: 'cup', baseQty: 1, p: 15, cal: 220 },
+      { keywords: ['almonds', 'walnuts', 'peanut butter'], unit: 'oz', baseQty: 1, p: 6, cal: 170 },
+      { keywords: ['string cheese', 'feta', 'swiss'], unit: 'piece', baseQty: 1, p: 7, cal: 80 },
+      { keywords: ['avocado'], unit: 'whole', baseQty: 1, p: 3, cal: 240 },
+      { keywords: ['toast', 'bread', 'wrap', 'tortilla'], unit: 'slice', baseQty: 1, p: 5, cal: 100 }
+    ];
+
+    function parseFoodTextToMacros(text) {
+      if (!text || !text.trim()) return { protein: 0, calories: 0 };
+      const clauses = text.toLowerCase().split(/[,+&\n]+/);
+      let totalP = 0;
+      let totalCal = 0;
+
+      clauses.forEach(clause => {
+        const clean = clause.trim();
+        if (!clean) return;
+
+        // Extract leading or embedded number (supports fractions like 1/2 or decimals)
+        let qty = null;
+        const fracMatch = clean.match(/(\d+)\s*\/\s*(\d+)/);
+        const numMatch = clean.match(/(\d+(\.\d+)?)/);
+        if (fracMatch) {
+          qty = parseFloat(fracMatch[1]) / parseFloat(fracMatch[2]);
+        } else if (numMatch) {
+          qty = parseFloat(numMatch[1]);
+        }
+
+        for (const item of FOOD_DATABASE) {
+          if (item.keywords.some(kw => clean.includes(kw))) {
+            const effectiveQty = qty !== null ? qty : item.baseQty;
+            const multiplier = effectiveQty / item.baseQty;
+            totalP += item.p * multiplier;
+            totalCal += item.cal * multiplier;
+            break;
+          }
+        }
+      });
+
+      return {
+        protein: Math.round(totalP),
+        calories: Math.round(totalCal)
+      };
+    }
+
+    function runSmartFoodParser() {
+      const text = document.getElementById('smartFoodInput').value;
+      const res = parseFoodTextToMacros(text);
+      document.getElementById('smartParsedProtein').textContent = res.protein;
+      document.getElementById('smartParsedCalories').textContent = res.calories;
+
+      const statusEl = document.getElementById('smartParsedLeucineStatus');
+      if (res.protein >= 35) {
+        statusEl.textContent = '✓ Exceeds 35g protein threshold (Triggers muscle protein synthesis)';
+        statusEl.className = 'text-[10px] text-emerald-400 font-semibold';
+      } else if (res.protein > 0) {
+        statusEl.textContent = `Add +${35 - res.protein}g protein to reach 35g leucine bolus threshold`;
+        statusEl.className = 'text-[10px] text-amber-400';
+      } else {
+        statusEl.textContent = 'Enter foods above to evaluate 35g leucine threshold';
+        statusEl.className = 'text-[10px] text-slate-500';
+      }
+    }
+
+    function appendQuickFood(snippet) {
+      const input = document.getElementById('smartFoodInput');
+      input.value = input.value.trim() ? `${input.value.trim()}, ${snippet}` : snippet;
+      runSmartFoodParser();
+    }
+
+    function addSmartParsedMealToDay() {
+      const text = document.getElementById('smartFoodInput').value.trim();
+      if (!text) return;
+      const res = parseFoodTextToMacros(text);
+
+      const newMeal = {
+        id: 'meal_' + Date.now(),
+        type: 'meal',
+        slot: 'Custom Bolus',
+        title: text,
+        protein: res.protein || 35,
+        calories: res.calories || 350,
+        checked: true
+      };
+
+      appState.days[appState.activeDay].items.push(newMeal);
+      document.getElementById('smartFoodInput').value = '';
+      runSmartFoodParser();
+      saveAppState();
+      renderAll();
+      switchTab('planner');
+    }
+
+    // Modal Item Editor Functions
+    function openItemEditor(itemId) {
+      const dayObj = appState.days[appState.activeDay];
+      const item = dayObj.items.find(i => i.id === itemId);
+      if (!item) return;
+
+      document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-emerald-400"></i> Edit ${item.type === 'meal' ? 'Meal' : 'Exercise'} Item`;
+      document.getElementById('modalItemId').value = item.id;
+      document.getElementById('modalItemType').value = item.type;
+      document.getElementById('modalItemSlot').value = item.slot || '';
+      document.getElementById('modalItemTitle').value = item.title || '';
+
+      document.getElementById('modalItemProtein').value = item.protein || 0;
+      document.getElementById('modalItemCalories').value = item.calories || 0;
+      document.getElementById('modalItemDuration').value = item.duration || 30;
+      document.getElementById('modalItemMets').value = item.mets || 4.0;
+      document.getElementById('modalItemBurn').value = item.burn || 200;
+
+      document.getElementById('modalDeleteBtn').classList.remove('hidden');
+      toggleModalFieldsByType();
+      document.getElementById('itemEditorModal').classList.remove('hidden');
+    }
+
+    function openModalForNewItem() {
+      document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-plus-circle text-emerald-400"></i> Add Custom Item (Day ${appState.activeDay})`;
+      document.getElementById('modalItemId').value = '';
+      document.getElementById('modalItemType').value = 'meal';
+      document.getElementById('modalItemSlot').value = 'Custom Meal';
+      document.getElementById('modalItemTitle').value = '';
+      document.getElementById('modalItemProtein').value = 40;
+      document.getElementById('modalItemCalories').value = 400;
+      document.getElementById('modalItemDuration').value = 45;
+      document.getElementById('modalItemMets').value = 5.0;
+      document.getElementById('modalItemBurn').value = calculateBurnFromMets(5.0, 45, appState.profile.weightLbs, 0);
+
+      document.getElementById('modalDeleteBtn').classList.add('hidden');
+      toggleModalFieldsByType();
+      document.getElementById('itemEditorModal').classList.remove('hidden');
+    }
+
+    function toggleModalFieldsByType() {
+      const type = document.getElementById('modalItemType').value;
+      const mealFields = document.getElementById('modalMealFields');
+      const exFields = document.getElementById('modalExerciseFields');
+      const estBtn = document.getElementById('modalAutoEstimateBtn');
+
+      if (type === 'meal') {
+        mealFields.classList.remove('hidden');
+        exFields.classList.add('hidden');
+        estBtn.classList.remove('hidden');
+      } else {
+        mealFields.classList.add('hidden');
+        exFields.classList.remove('hidden');
+        estBtn.classList.add('hidden');
+      }
+    }
+
+    function autoEstimateInsideModal() {
+      const desc = document.getElementById('modalItemTitle').value;
+      const macros = parseFoodTextToMacros(desc);
+      if (macros.protein > 0 || macros.calories > 0) {
+        document.getElementById('modalItemProtein').value = macros.protein;
+        document.getElementById('modalItemCalories').value = macros.calories;
+      }
+    }
+
+    function recalcModalExerciseBurn() {
+      const dur = parseFloat(document.getElementById('modalItemDuration').value) || 0;
+      const mets = parseFloat(document.getElementById('modalItemMets').value) || 1;
+      const burn = calculateBurnFromMets(mets, dur, appState.profile.weightLbs, 0);
+      document.getElementById('modalItemBurn').value = burn;
+    }
+
+    function saveModalItem() {
+      const id = document.getElementById('modalItemId').value;
+      const type = document.getElementById('modalItemType').value;
+      const slot = document.getElementById('modalItemSlot').value.trim() || (type === 'meal' ? 'Meal' : 'Training');
+      const title = document.getElementById('modalItemTitle').value.trim() || 'Custom Checklist Item';
+
+      const dayObj = appState.days[appState.activeDay];
+
+      if (id) {
+        const existing = dayObj.items.find(i => i.id === id);
+        if (existing) {
+          existing.type = type;
+          existing.slot = slot;
+          existing.title = title;
+          if (type === 'meal') {
+            existing.protein = parseInt(document.getElementById('modalItemProtein').value, 10) || 0;
+            existing.calories = parseInt(document.getElementById('modalItemCalories').value, 10) || 0;
+          } else {
+            existing.duration = parseInt(document.getElementById('modalItemDuration').value, 10) || 0;
+            existing.mets = parseFloat(document.getElementById('modalItemMets').value) || 1;
+            existing.burn = parseInt(document.getElementById('modalItemBurn').value, 10) || 0;
+          }
+        }
+      } else {
+        const newItem = {
+          id: 'custom_' + Date.now(),
+          type,
+          slot,
+          title,
+          checked: false
+        };
+        if (type === 'meal') {
+          newItem.protein = parseInt(document.getElementById('modalItemProtein').value, 10) || 0;
+          newItem.calories = parseInt(document.getElementById('modalItemCalories').value, 10) || 0;
+        } else {
+          newItem.duration = parseInt(document.getElementById('modalItemDuration').value, 10) || 0;
+          newItem.mets = parseFloat(document.getElementById('modalItemMets').value) || 1;
+          newItem.burn = parseInt(document.getElementById('modalItemBurn').value, 10) || 0;
+        }
+        dayObj.items.push(newItem);
+      }
+
+      closeItemModal();
+      saveAppState();
+      renderAll();
+    }
+
+    function deleteModalItem() {
+      const id = document.getElementById('modalItemId').value;
+      if (!id) return;
+      const dayObj = appState.days[appState.activeDay];
+      dayObj.items = dayObj.items.filter(i => i.id !== id);
+      closeItemModal();
+      saveAppState();
+      renderAll();
+    }
+
+    function closeItemModal() {
+      document.getElementById('itemEditorModal').classList.add('hidden');
+    }
+
+    // Grocery List Rendering
+    function renderGroceryList() {
+      const container = document.getElementById('groceryCategoriesContainer');
+      container.innerHTML = appState.groceries.map((cat, cIdx) => `
+        <div class="bg-slate-950/80 rounded-xl p-3 border border-slate-800 space-y-2">
+          <div class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold">${escapeHtml(cat.category)}</div>
+          <div class="space-y-1.5">
+            ${cat.items.map((item, iIdx) => `
+              <div onclick="toggleGroceryItem(${cIdx}, ${iIdx})" class="flex items-center gap-2.5 p-2 rounded-lg hover:bg-slate-900 cursor-pointer transition">
+                <div class="w-5 h-5 rounded-md flex items-center justify-center border ${
+                  item.checked ? 'bg-emerald-500 border-emerald-400 text-slate-950' : 'bg-slate-950 border-slate-700 text-transparent'
+                }">
+                  <i class="fa-solid fa-check text-xs"></i>
+                </div>
+                <span class="text-xs ${item.checked ? 'line-through text-slate-500' : 'text-slate-200'}">${escapeHtml(item.name)}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleGroceryItem(cIdx, iIdx) {
+      const item = appState.groceries[cIdx]?.items[iIdx];
+      if (item) {
+        item.checked = !item.checked;
+        saveAppState();
+        renderGroceryList();
+      }
+    }
+
+    function clearGroceryChecks() {
+      appState.groceries.forEach(cat => cat.items.forEach(i => i.checked = false));
+      saveAppState();
+      renderGroceryList();
+    }
+
+    // Reset Modal Functions
+    function openResetModal() {
+      document.getElementById('resetConfirmModal').classList.remove('hidden');
+    }
+
+    function closeResetModal() {
+      document.getElementById('resetConfirmModal').classList.add('hidden');
+    }
+
+    function uncheckCurrentDayOnly() {
+      appState.days[appState.activeDay].items.forEach(i => i.checked = false);
+      saveAppState();
+      closeResetModal();
+      renderAll();
+    }
+
+    function restoreFullFactoryDefaults() {
+      localStorage.removeItem(STORAGE_KEY);
+      appState = buildDefaultState();
+      saveAppState();
+      closeResetModal();
+      renderAll();
+    }
+
+    // Bottom Navigation Tab Switcher
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.add('hidden'));
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.className = 'nav-tab-btn flex flex-col items-center justify-center py-2 rounded-xl text-slate-400 hover:text-slate-200 font-medium transition';
+      });
+      const activeBtn = document.getElementById(`nav-btn-${tabName}`);
+      if (activeBtn) {
+        activeBtn.className = 'nav-tab-btn flex flex-col items-center justify-center py-2 rounded-xl text-emerald-400 bg-emerald-500/10 font-semibold transition';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderAll() {
+      renderPhaseButtons();
+      renderDayButtons();
+      renderChecklists();
+      renderTelemetryAndCalculator();
+      renderGroceryList();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAppState();
+      renderAll();
+    });
+  </script>
+</body>
+</html>
